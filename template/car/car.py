@@ -1,6 +1,7 @@
 # ALUMNOS: CUIDADO SI DESEAN MODIFICAR ESTE ARCHIVO
 
 import math
+import pygame
 
 from track.track import Track
 
@@ -16,16 +17,24 @@ class Car:
             driver_name (str): The name of the driver
             car_number (int): The number of the car
         """
+        self.driver = driver_name
+        self.number = car_number # 1 para player_1, 2 para player_2, 95 para CPU
+        self.position= Track.get_starting_position()
+        self.direction= Track.get_starting_direction()
+        self.speed = 0 # ?
+
+        # max_speed
+
         pass
 
-    def get_speed(self) -> float:
+    def get_speed(self) -> float:# devuelve self.speed
         """
         Returns the speed of the car
         
         Returns:
             float: The speed of the car
         """
-        pass
+        return self.speed
 
     def get_position(self) -> list[float]:
         """
@@ -34,7 +43,7 @@ class Car:
         Returns:
             list[float]: The position [x, y] of the car
         """
-        pass
+        return self.position
 
     def get_direction(self) -> float:
         """
@@ -43,9 +52,9 @@ class Car:
         Returns:
             float: The direction of the car in radians
         """
-        pass
+        return self.direction
 
-    def set_position(self, position: list[float]):
+    def set_position(self, position: list[float]): #cambia la posicion
         """
         Sets the position of the car (and save the last position too)
 
@@ -54,7 +63,7 @@ class Car:
         """
         pass
 
-    def set_speed(self, speed: float):
+    def set_speed(self, speed: float): #cambia la velocidad, teniendo en cuenta
         """
         Sets the speed of the car
 
