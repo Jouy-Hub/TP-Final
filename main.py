@@ -1,12 +1,13 @@
 #Importar lo necesario
-
+# Escribir el menu en el mismo loop de pygame.
+# Escribir primero game()
 import pygame
+from juego import *
 
 def main():
-    #pygame.init()
-    #time = pygame.time.Clock
-    
-    pass
+
+    players,cpu=terminal_menu()
+    game(players,cpu)
 
 if __name__=="__main__":
     main()
