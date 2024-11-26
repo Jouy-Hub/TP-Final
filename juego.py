@@ -158,6 +158,7 @@ def terminal_menu()->tuple:
         cpu=input("Cpu si/no: ").lower()
         cpu_bool = False if cpu == "no" else True
 
+
     return jugadores,cpu_bool
     
 # cpu decide teclas (retorna teclas)
@@ -166,7 +167,6 @@ def game(players:list,cpu:bool):
     pygame.init()
     screen = pygame.display.set_mode((800, 720))
     clock = pygame.time.Clock()
-    dt=0
     running = True
 
     track = Track()
@@ -176,18 +176,22 @@ def game(players:list,cpu:bool):
     cars=[]
     teclas_1 = [pygame.K_UP, pygame.K_DOWN, pygame.K_LEFT, pygame.K_RIGHT]
     distance_1=track.get_distances_car(starting_position,starting_direction)
-    car_1=PlayerCar(players[0], 1,starting_position,starting_direction,distance_1)
+    car_1=PlayerCar(players[0], 1,teclas_1,starting_position,starting_direction,distance_1)
+    vueltas_1=0
     cars.append(car_1)
 
     if len(players)>1:
         teclas_2 = [pygame.K_w, pygame.K_s, pygame.K_a, pygame.K_d]
         distance_2=track.get_distances_car(starting_position,starting_direction)
-        car_2=PlayerCar(players[1], 2, starting_position,starting_direction,distance_2)
+        car_2=PlayerCar(players[1], 2, teclas_2, starting_position,starting_direction,distance_2)
+        vueltas_2=0
         cars.append(car_2)
     
     if cpu:
         distance_cpu=track.get_distances_car(starting_position,starting_direction)
-        car_cpu = AutoCar("CPU", 95,starting_position,starting_direction,distance_cpu)
+        teclas_cpu=[]
+        car_cpu = AutoCar("CPU", 95,teclas_cpu,starting_position,starting_direction,distance_cpu)
+        vueltas_cpu=0
         cars.append(car_cpu)
 
     
@@ -214,6 +218,8 @@ def game(players:list,cpu:bool):
 
         #imprimir a Player 1
         pygame.draw.circle(screen,(50,50,50), car_1.get_position(), 5)
+        if len(players)>1:
+            pygame.draw.circle(screen,(0,0,50), car_2.get_position(), 5)
 
         #mover a player 1
         keys = pygame.key.get_pressed()
@@ -232,7 +238,42 @@ def game(players:list,cpu:bool):
         track.move_car(car_1)
         car_1.distances=track.get_distances_car(car_1.position,car_1.direction)
 
+        if len(players)>1:
+            p2_pressed_keys={"UP":False,"DOWN":False,"LEFT":False,"RIGHT":False}#las inicializo como no presionadas
+            if keys[pygame.K_w]:
+                p2_pressed_keys["UP"]=True
+            if keys[pygame.K_s]:
+                p2_pressed_keys["DOWN"]=True
+            if keys[pygame.K_a]:
+                p2_pressed_keys["LEFT"]=True
+            if keys[pygame.K_d]:
+                p2_pressed_keys["RIGHT"]=True
+            p2_inside_track= track.is_point_inside_track(car_2.get_position())
+            acc_2,steer_2 = car_2.get_command(p2_pressed_keys, p2_inside_track)
+            car_2.send_command(acc_2,steer_2)
+            track.move_car(car_2)
+            car_2.distances=track.get_distances_car(car_2.position,car_2.direction)
 
+        lap_1= track.check_lap([car_1.last_position,car_1.position])
+        if len(players)>1:
+            lap_2=track.check_lap([car_2.last_position,car_2.position])
+        #if cpu:
+        #    lap_cpu=track.check_lap([car_cpu.last_position,car_cpu.position])
+        
+        if lap_1:
+            vueltas_1+=1
+            print(vueltas_1)
+        if len(players)>1 and lap_2:
+            vueltas_2+=1
+       # if cpu and lap_cpu:
+       #     vueltas_cpu+=1
+
+        if 3==vueltas_1:
+            print('Gano jugador 1')
+            running=False
+        if len(players)>1 and 3==vueltas_2:
+            print('Gano jugador 2')
+            running=False
 
 
     # flip() the display to put your work on screen
@@ -241,5 +282,4 @@ def game(players:list,cpu:bool):
         clock.tick(100)
         # dt is delta time in seconds since last frame, used for framerate-
         # independent physics.
-        dt = clock.tick(100) / 1000
     pygame.quit()

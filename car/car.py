@@ -8,7 +8,7 @@ class Car:
     def __init__(self, driver_name: str, car_number: int) -> None:
         raise NotImplementedError("Car class must be inherited by a child class")
 
-    def init(self, driver_name: str, car_number: int, position:list, direction:float,distances:list):#ingresamos position y direction del track (se lo pasa autocar o playercar)
+    def init(self, driver_name: str, car_number: int, movement_keys:list, position:list, direction:float,distances:list):#ingresamos position y direction del track (se lo pasa autocar o playercar)
         """
         Initializes the car with the driver name and car number. All the common attributes should be initialized here.
         

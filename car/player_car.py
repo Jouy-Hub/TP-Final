@@ -2,7 +2,7 @@ from car.car import Car
 import math
 
 class PlayerCar(Car):
-    def __init__(self, driver_name: str, car_number: int, movement_keys: list, position:list, direction:float):#Agregue position y directtion para que se las pase a Car
+    def __init__(self, driver_name: str, car_number: int, movement_keys: list, position:list, direction:float,distances:list):#Agregue position y directtion para que se las pase a Car
         """
         Initializes the player car
 
@@ -12,7 +12,7 @@ class PlayerCar(Car):
             movement_keys (list): The keys for the movement [up, down, left, right]. 
                                   Probably something like [pygame.K_UP, pygame.K_DOWN, pygame.K_LEFT, pygame.K_RIGHT]
         """
-        super().init(driver_name, car_number,position, direction)
+        super().init(driver_name, car_number,movement_keys,position, direction,distances)
         self.movement_keys = movement_keys
 
     def get_command(self, pygame_keys, is_inside_track):#no hace falta inside track
