@@ -207,10 +207,14 @@ def game(players:list,cpu:bool):
         # RENDER YOUR GAME HERE (Aca va el codigo de juego a actualizar en cada tick)
         exterior = list(track.track_polygon.exterior.coords)
         interior = list(track.track_polygon.interiors[0].coords)
+        
         for tupla in range(len(exterior)-1):
             pygame.draw.line(screen, (0,0,0),exterior[tupla],exterior[tupla+1])
         for tupla in range(len(interior)-1):
             pygame.draw.line(screen, (0,0,0),interior[tupla],interior[tupla+1])
+
+        #for tupla in range(): --> pintar pista
+
         
         #Printear linea de partida
         finish_line_coords = list(track.finish_line.coords)  # Convierte LineString a lista de puntos
@@ -219,7 +223,10 @@ def game(players:list,cpu:bool):
         #imprimir a Player 1
         pygame.draw.circle(screen,(50,50,50), car_1.get_position(), 5)
         if len(players)>1:
-            pygame.draw.circle(screen,(0,0,50), car_2.get_position(), 5)
+            pygame.draw.circle(screen,(0,0,30), car_2.get_position(), 5)
+        if cpu:
+            pygame.draw.circle(screen,(30,0,50), car_cpu.get_position(), 5)
+
 
         #mover a player 1
         keys = pygame.key.get_pressed()
@@ -254,25 +261,36 @@ def game(players:list,cpu:bool):
             track.move_car(car_2)
             car_2.distances=track.get_distances_car(car_2.position,car_2.direction)
 
+        if cpu:
+            cpu_inside_track= track.is_point_inside_track(car_cpu.get_position())
+            acc_cpu,steer_cpu = car_cpu.get_command(0, cpu_inside_track)
+            car_cpu.send_command(acc_cpu,steer_cpu)
+            track.move_car(car_cpu)
+            car_cpu.distances=track.get_distances_car(car_cpu.position,car_cpu.direction)
+
         lap_1= track.check_lap([car_1.last_position,car_1.position])
         if len(players)>1:
             lap_2=track.check_lap([car_2.last_position,car_2.position])
-        #if cpu:
-        #    lap_cpu=track.check_lap([car_cpu.last_position,car_cpu.position])
+        if cpu:
+            lap_cpu=track.check_lap([car_cpu.last_position,car_cpu.position])
         
         if lap_1:
             vueltas_1+=1
-            print(vueltas_1)
+
         if len(players)>1 and lap_2:
             vueltas_2+=1
-       # if cpu and lap_cpu:
-       #     vueltas_cpu+=1
+
+        if cpu and lap_cpu:
+            vueltas_cpu+=1
 
         if 3==vueltas_1:
             print('Gano jugador 1')
             running=False
         if len(players)>1 and 3==vueltas_2:
             print('Gano jugador 2')
+            running=False
+        if cpu and 3==vueltas_cpu:
+            print("Gano el rayo")
             running=False
 
 

@@ -123,6 +123,8 @@ class Car:
         new_speed=self.get_speed()+acceleration
         if new_speed >= 0.5:
             new_speed = 0.5
+        if new_speed <= -0.5:
+            new_speed = -0.5 
         self.set_speed(new_speed)
         
         pass

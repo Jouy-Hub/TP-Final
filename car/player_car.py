@@ -2,7 +2,7 @@ from car.car import Car
 import math
 
 class PlayerCar(Car):
-    def __init__(self, driver_name: str, car_number: int, movement_keys: list, position:list, direction:float,distances:list):#Agregue position y directtion para que se las pase a Car
+    def __init__(self, driver_name: str, car_number: int, movement_keys: list, position:list, direction:float,distances:list):
         """
         Initializes the player car
 
