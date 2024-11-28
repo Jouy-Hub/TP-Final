@@ -63,7 +63,3 @@ class AutoCar(Car):
         #que hago con la bool (la posicion modifica la velocidad o la aceleracion?)
 
         return [acceleration, steering]
-
-
-        
-        pass

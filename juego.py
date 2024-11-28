@@ -4,6 +4,8 @@ from car.player_car import PlayerCar
 from car.auto_car import AutoCar
 import pygame
 
+import math
+
 #Hay que arreglar el menu
 def get_player_name(num):
     """
@@ -161,7 +163,6 @@ def terminal_menu()->tuple:
 
     return jugadores,cpu_bool
     
-# cpu decide teclas (retorna teclas)
 
 def game(players:list,cpu:bool):
     pygame.init()
@@ -186,6 +187,8 @@ def game(players:list,cpu:bool):
         car_2=PlayerCar(players[1], 2, teclas_2, starting_position,starting_direction,distance_2)
         vueltas_2=0
         cars.append(car_2)
+        p2_sprite= pygame.image.load("P2_Car_Sprite.png")
+        p2_sprite = pygame.transform.scale(p2_sprite, (20, 20))#resize
     
     if cpu:
         distance_cpu=track.get_distances_car(starting_position,starting_direction)
@@ -202,30 +205,41 @@ def game(players:list,cpu:bool):
                 running = False
 
         # fill the screen with a color to wipe away anything from last frame
-        screen.fill("green")
+        screen.fill((0,102,51))
 
         # RENDER YOUR GAME HERE (Aca va el codigo de juego a actualizar en cada tick)
         exterior = list(track.track_polygon.exterior.coords)
         interior = list(track.track_polygon.interiors[0].coords)
+
+        #Pintar pista
+        pygame.draw.polygon(screen, (50,50,60), interior + exterior[::-1], 0)
         
         for tupla in range(len(exterior)-1):
             pygame.draw.line(screen, (0,0,0),exterior[tupla],exterior[tupla+1])
         for tupla in range(len(interior)-1):
             pygame.draw.line(screen, (0,0,0),interior[tupla],interior[tupla+1])
 
-        #for tupla in range(): --> pintar pista
-
-        
         #Printear linea de partida
         finish_line_coords = list(track.finish_line.coords)  # Convierte LineString a lista de puntos
         pygame.draw.line(screen, (255, 0, 0), (finish_line_coords[0][0], finish_line_coords[0][1]), (finish_line_coords[1][0], finish_line_coords[1][1]),3)
 
-        #imprimir a Player 1
-        pygame.draw.circle(screen,(50,50,50), car_1.get_position(), 5)
+        #imprimir Players
+        pygame.draw.circle(screen,(0,0,200), car_1.get_position(), 5)
         if len(players)>1:
-            pygame.draw.circle(screen,(0,0,30), car_2.get_position(), 5)
+            # Obtener el ángulo de dirección en grados --> la funcion se hace con grados, non radianes
+            angle = math.degrees(car_2.direction)  # Convertir radianes a grados
+
+            # Rotar el sprite del Player 2
+            rotated_sprite = pygame.transform.rotate(p2_sprite, -angle-90)  # Nota: el ángulo se invierte (-angle) porque pygame rota en sentido antihorario
+
+            # Ajustar la posición del sprite para que el centro sea consistente
+            sprite_rect = rotated_sprite.get_rect(center=car_2.get_position())
+
+            # Dibujar el sprite rotado en la pantalla
+            screen.blit(rotated_sprite, sprite_rect.topleft)
+            
         if cpu:
-            pygame.draw.circle(screen,(30,0,50), car_cpu.get_position(), 5)
+            pygame.draw.circle(screen,(200,0,0), car_cpu.get_position(), 5)
 
 
         #mover a player 1
@@ -292,12 +306,24 @@ def game(players:list,cpu:bool):
         if cpu and 3==vueltas_cpu:
             print("Gano el rayo")
             running=False
+        
+        #font = pygame.font.Font(None, 36)
+        #laps_text = font.render(f"{players[0]}: {vueltas_1} vueltas", True, (0, 0, 0))
+        #screen.blit(laps_text, (10, 10))
+
+        #if len(players) > 1:
+            #laps_text_2 = font.render(f"{players[1]}: {vueltas_2} vueltas", True, (0, 0, 0))
+            #screen.blit(laps_text_2, (10, 40))
+
+        
+        #if cpu:
+        #    laps_text_cpu = font.render(f"CPU: {vueltas_cpu} vueltas", True, (0, 0, 0))
+        #   screen.blit(laps_text_cpu, (10, 70))
 
 
     # flip() the display to put your work on screen
         pygame.display.flip()
 
         clock.tick(100)
-        # dt is delta time in seconds since last frame, used for framerate-
-        # independent physics.
+
     pygame.quit()
