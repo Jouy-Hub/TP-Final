@@ -180,6 +180,8 @@ def game(players:list,cpu:bool):
     car_1=PlayerCar(players[0], 1,teclas_1,starting_position,starting_direction,distance_1)
     vueltas_1=0
     cars.append(car_1)
+    p1_sprite= pygame.image.load("P1_Car_Sprite.png")
+    p1_sprite = pygame.transform.scale(p1_sprite, (20, 20))#resize
 
     if len(players)>1:
         teclas_2 = [pygame.K_w, pygame.K_s, pygame.K_a, pygame.K_d]
@@ -196,6 +198,8 @@ def game(players:list,cpu:bool):
         car_cpu = AutoCar("CPU", 95,teclas_cpu,starting_position,starting_direction,distance_cpu)
         vueltas_cpu=0
         cars.append(car_cpu)
+        cpu_sprite= pygame.image.load("El_Rayo.png")
+        cpu_sprite = pygame.transform.scale(cpu_sprite, (20, 20))#resize
 
     
     while running:
@@ -224,22 +228,29 @@ def game(players:list,cpu:bool):
         pygame.draw.line(screen, (255, 0, 0), (finish_line_coords[0][0], finish_line_coords[0][1]), (finish_line_coords[1][0], finish_line_coords[1][1]),3)
 
         #imprimir Players
-        pygame.draw.circle(screen,(0,0,200), car_1.get_position(), 5)
+        angle_1 = math.degrees(car_1.direction) 
+        rotated_sprite_1 = pygame.transform.rotate(p1_sprite, -angle_1-90) 
+        sprite_rect_1 = rotated_sprite_1.get_rect(center=car_1.get_position())
+        screen.blit(rotated_sprite_1, sprite_rect_1.topleft)
+
         if len(players)>1:
             # Obtener el ángulo de dirección en grados --> la funcion se hace con grados, non radianes
-            angle = math.degrees(car_2.direction)  # Convertir radianes a grados
+            angle_2 = math.degrees(car_2.direction)  # Convertir radianes a grados
 
             # Rotar el sprite del Player 2
-            rotated_sprite = pygame.transform.rotate(p2_sprite, -angle-90)  # Nota: el ángulo se invierte (-angle) porque pygame rota en sentido antihorario
+            rotated_sprite_2 = pygame.transform.rotate(p2_sprite, -angle_2-90)  # Nota: el ángulo se invierte (-angle) porque pygame rota en sentido antihorario
 
             # Ajustar la posición del sprite para que el centro sea consistente
-            sprite_rect = rotated_sprite.get_rect(center=car_2.get_position())
+            sprite_rect_2 = rotated_sprite_2.get_rect(center=car_2.get_position())
 
             # Dibujar el sprite rotado en la pantalla
-            screen.blit(rotated_sprite, sprite_rect.topleft)
+            screen.blit(rotated_sprite_2, sprite_rect_2.topleft)
             
         if cpu:
-            pygame.draw.circle(screen,(200,0,0), car_cpu.get_position(), 5)
+            angle_cpu = math.degrees(car_cpu.direction) 
+            rotated_sprite_cpu = pygame.transform.rotate(cpu_sprite, -angle_cpu-90) 
+            sprite_rect_cpu = rotated_sprite_cpu.get_rect(center=car_cpu.get_position())
+            screen.blit(rotated_sprite_cpu, sprite_rect_cpu.topleft)
 
 
         #mover a player 1
