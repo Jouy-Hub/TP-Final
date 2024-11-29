@@ -1,4 +1,4 @@
-#Importar lo necesariowd
+#Importar los necesariowd
 # Escribir el menu en el mismo loop de pygame.
 # Escribir primero game()
 import pygame
