@@ -6,8 +6,7 @@ from juego import *
 
 def main():
 
-    players,cpu=terminal_menu()
-    game(players,cpu)
+    game()
 
 if __name__=="__main__":
     main()

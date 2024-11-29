@@ -9,7 +9,7 @@ from car.car import Car
 from track.utils.track_utils import curve_corners, random_midpoint
 
 class Track:
-    def __init__(self, num_points: int=15, corner_cells: int=20, x_max: int=800, y_max: int=600, width: int=20, margin_x: int=50, margin_y: int=50):
+    def __init__(self, num_points: int=15, corner_cells: int=20, x_max: int=800, y_max: int=720, width: int=30, margin_x: int=110, margin_y: int=110):
         self.width = width
         self.middle_of_track = self._generate_track([margin_x, x_max - margin_x], [margin_y, y_max - margin_y], num_points, corner_cells)
         self.track_polygon = self._create_ring_polygon()

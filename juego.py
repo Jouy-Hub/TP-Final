@@ -63,6 +63,7 @@ def menu():
     """
     pygame.init()
     screen = pygame.display.set_mode((800, 720))
+
     font = pygame.font.Font(None, 36)
     options = ["1 Player", "2 Players", "Quit"]
     selected = 0  # Índice de la opción seleccionada
@@ -164,172 +165,248 @@ def terminal_menu()->tuple:
     return jugadores,cpu_bool
     
 
-def game(players:list,cpu:bool):
+def game():
     pygame.init()
-    screen = pygame.display.set_mode((800, 720))
+    screen = pygame.display.set_mode((900, 820))
     clock = pygame.time.Clock()
     running = True
+    menu=True
+    sub_menu=False
+
+    menu_BG= pygame.image.load("Menu_BG.png")
+    menu_BG = pygame.transform.scale(menu_BG, (900, 820))
 
     track = Track()
     starting_position=track.get_starting_position()
     starting_direction=track.get_starting_direction()
+    BG= pygame.image.load("Background_2.jpg")
+    BG = pygame.transform.scale(BG, (1000, 920))
+    finish_line=pygame.image.load("finish_line.png")
+    finish_line=pygame.transform.scale(finish_line,(30,5))
+
     
     cars=[]
     teclas_1 = [pygame.K_UP, pygame.K_DOWN, pygame.K_LEFT, pygame.K_RIGHT]
     distance_1=track.get_distances_car(starting_position,starting_direction)
-    car_1=PlayerCar(players[0], 1,teclas_1,starting_position,starting_direction,distance_1)
+    car_1=PlayerCar('player 1', 1,teclas_1,starting_position,starting_direction,distance_1)
     vueltas_1=0
     cars.append(car_1)
     p1_sprite= pygame.image.load("P1_Car_Sprite.png")
-    p1_sprite = pygame.transform.scale(p1_sprite, (20, 20))#resize
+    p1_sprite = pygame.transform.scale(p1_sprite, (30, 30))#resize
 
-    if len(players)>1:
-        teclas_2 = [pygame.K_w, pygame.K_s, pygame.K_a, pygame.K_d]
-        distance_2=track.get_distances_car(starting_position,starting_direction)
-        car_2=PlayerCar(players[1], 2, teclas_2, starting_position,starting_direction,distance_2)
-        vueltas_2=0
-        cars.append(car_2)
-        p2_sprite= pygame.image.load("P2_Car_Sprite.png")
-        p2_sprite = pygame.transform.scale(p2_sprite, (20, 20))#resize
-    
-    if cpu:
-        distance_cpu=track.get_distances_car(starting_position,starting_direction)
-        teclas_cpu=[]
-        car_cpu = AutoCar("CPU", 95,teclas_cpu,starting_position,starting_direction,distance_cpu)
-        vueltas_cpu=0
-        cars.append(car_cpu)
-        cpu_sprite= pygame.image.load("El_Rayo.png")
-        cpu_sprite = pygame.transform.scale(cpu_sprite, (20, 20))#resize
+    teclas_2 = [pygame.K_w, pygame.K_s, pygame.K_a, pygame.K_d]
+    distance_2=track.get_distances_car(starting_position,starting_direction)
+    car_2=PlayerCar('player 2', 2, teclas_2, starting_position,starting_direction,distance_2)
+    vueltas_2=0
+    cars.append(car_2)
+    p2_sprite= pygame.image.load("P2_Car_Sprite.png")
+    p2_sprite = pygame.transform.scale(p2_sprite, (30, 30))#resize
+
+    distance_cpu=track.get_distances_car(starting_position,starting_direction)
+    teclas_cpu=[]
+    car_cpu = AutoCar("CPU", 95,teclas_cpu,starting_position,starting_direction,distance_cpu)
+    vueltas_cpu=0
+    cars.append(car_cpu)
+    cpu_sprite= pygame.image.load("El_Rayo.png")
+    cpu_sprite = pygame.transform.scale(cpu_sprite, (30, 30))#resize
+
+    font_menu = pygame.font.Font(None, 36)
+    options = ["1 Player", "2 Players"]
+    options_2=['YES','NO']
+    cpu = False
+    players = []
+    selected = 0  # Índice de la opción seleccionada
+    selected_2=0
+    enter_pressed=False
 
     
     while running:
+        keys = pygame.key.get_pressed()
     # pygame.QUIT event means the user clicked X to close your window
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
                 running = False
-
-        # fill the screen with a color to wipe away anything from last frame
-        screen.fill((0,102,51))
-
-        # RENDER YOUR GAME HERE (Aca va el codigo de juego a actualizar en cada tick)
-        exterior = list(track.track_polygon.exterior.coords)
-        interior = list(track.track_polygon.interiors[0].coords)
-
-        #Pintar pista
-        pygame.draw.polygon(screen, (50,50,60), interior + exterior[::-1], 0)
+        if menu and sub_menu==False:
+            screen.blit(menu_BG, (0, 0))
+            for index, option in enumerate(options):
+                color = (0, 0, 0) if index != selected else (150, 0, 150)  # Resalta la opción seleccionada
+                text_surface = font_menu.render(option, False, color)  # Renderiza la opción
+                screen.blit(text_surface, (340, 300 + index * 50))  # Muestra las opciones
         
-        for tupla in range(len(exterior)-1):
-            pygame.draw.line(screen, (0,0,0),exterior[tupla],exterior[tupla+1])
-        for tupla in range(len(interior)-1):
-            pygame.draw.line(screen, (0,0,0),interior[tupla],interior[tupla+1])
-
-        #Printear linea de partida
-        finish_line_coords = list(track.finish_line.coords)  # Convierte LineString a lista de puntos
-        pygame.draw.line(screen, (255, 0, 0), (finish_line_coords[0][0], finish_line_coords[0][1]), (finish_line_coords[1][0], finish_line_coords[1][1]),3)
-
-        #imprimir Players
-        angle_1 = math.degrees(car_1.direction) 
-        rotated_sprite_1 = pygame.transform.rotate(p1_sprite, -angle_1-90) 
-        sprite_rect_1 = rotated_sprite_1.get_rect(center=car_1.get_position())
-        screen.blit(rotated_sprite_1, sprite_rect_1.topleft)
-
-        if len(players)>1:
-            # Obtener el ángulo de dirección en grados --> la funcion se hace con grados, non radianes
-            angle_2 = math.degrees(car_2.direction)  # Convertir radianes a grados
-
-            # Rotar el sprite del Player 2
-            rotated_sprite_2 = pygame.transform.rotate(p2_sprite, -angle_2-90)  # Nota: el ángulo se invierte (-angle) porque pygame rota en sentido antihorario
-
-            # Ajustar la posición del sprite para que el centro sea consistente
-            sprite_rect_2 = rotated_sprite_2.get_rect(center=car_2.get_position())
-
-            # Dibujar el sprite rotado en la pantalla
-            screen.blit(rotated_sprite_2, sprite_rect_2.topleft)
-            
-        if cpu:
-            angle_cpu = math.degrees(car_cpu.direction) 
-            rotated_sprite_cpu = pygame.transform.rotate(cpu_sprite, -angle_cpu-90) 
-            sprite_rect_cpu = rotated_sprite_cpu.get_rect(center=car_cpu.get_position())
-            screen.blit(rotated_sprite_cpu, sprite_rect_cpu.topleft)
-
-
-        #mover a player 1
-        keys = pygame.key.get_pressed()
-        p1_pressed_keys={"UP":False,"DOWN":False,"LEFT":False,"RIGHT":False}#las inicializo como no presionadas
-        if keys[pygame.K_UP]:
-            p1_pressed_keys["UP"]=True
-        if keys[pygame.K_DOWN]:
-            p1_pressed_keys["DOWN"]=True
-        if keys[pygame.K_LEFT]:
-            p1_pressed_keys["LEFT"]=True
-        if keys[pygame.K_RIGHT]:
-            p1_pressed_keys["RIGHT"]=True
-        p1_inside_track= track.is_point_inside_track(car_1.get_position())
-        acc_1,steer_1 = car_1.get_command(p1_pressed_keys, p1_inside_track)
-        car_1.send_command(acc_1,steer_1)
-        track.move_car(car_1)
-        car_1.distances=track.get_distances_car(car_1.position,car_1.direction)
-
-        if len(players)>1:
-            p2_pressed_keys={"UP":False,"DOWN":False,"LEFT":False,"RIGHT":False}#las inicializo como no presionadas
-            if keys[pygame.K_w]:
-                p2_pressed_keys["UP"]=True
-            if keys[pygame.K_s]:
-                p2_pressed_keys["DOWN"]=True
-            if keys[pygame.K_a]:
-                p2_pressed_keys["LEFT"]=True
-            if keys[pygame.K_d]:
-                p2_pressed_keys["RIGHT"]=True
-            p2_inside_track= track.is_point_inside_track(car_2.get_position())
-            acc_2,steer_2 = car_2.get_command(p2_pressed_keys, p2_inside_track)
-            car_2.send_command(acc_2,steer_2)
-            track.move_car(car_2)
-            car_2.distances=track.get_distances_car(car_2.position,car_2.direction)
-
-        if cpu:
-            cpu_inside_track= track.is_point_inside_track(car_cpu.get_position())
-            acc_cpu,steer_cpu = car_cpu.get_command(0, cpu_inside_track)
-            car_cpu.send_command(acc_cpu,steer_cpu)
-            track.move_car(car_cpu)
-            car_cpu.distances=track.get_distances_car(car_cpu.position,car_cpu.direction)
-
-        lap_1= track.check_lap([car_1.last_position,car_1.position])
-        if len(players)>1:
-            lap_2=track.check_lap([car_2.last_position,car_2.position])
-        if cpu:
-            lap_cpu=track.check_lap([car_cpu.last_position,car_cpu.position])
+            if event.type == pygame.KEYDOWN:
+                if event.key == pygame.K_UP:  # Mover arriba
+                    selected = 0
+                elif event.key == pygame.K_DOWN:  # Mover abajo
+                    selected = 1
+                elif event.key == pygame.K_RETURN:  # Detectar ENTER presionado
+                    enter_pressed = True  # Indicar que ENTER está presionado
         
-        if lap_1:
-            vueltas_1+=1
+            if event.type == pygame.KEYUP:  # Detectar cuando ENTER es liberado
+                if event.key == pygame.K_RETURN and enter_pressed:
+                    enter_pressed = False  # Resetear el estado de ENTER
+                    if selected == 0:  # Opción 1 Player
+                        players = ['Player 1']
+                        cpu = True
+                        menu = False
+                        sub_menu = False
+                    elif selected == 1:  # Opción 2 Players
+                        players = ['Player 1', 'Player 2']
+                        sub_menu = True
+                        menu=False
 
-        if len(players)>1 and lap_2:
-            vueltas_2+=1
-
-        if cpu and lap_cpu:
-            vueltas_cpu+=1
-
-        if 3==vueltas_1:
-            print('Gano jugador 1')
-            running=False
-        if len(players)>1 and 3==vueltas_2:
-            print('Gano jugador 2')
-            running=False
-        if cpu and 3==vueltas_cpu:
-            print("Gano el rayo")
-            running=False
+        if sub_menu and menu==False:  # Lógica del submenú
+            screen.blit(menu_BG, (0, 0))
+            for index_2, option_2 in enumerate(options_2):
+                color = (0, 0, 0) if index_2 != selected_2 else (150, 0, 150)
+                text_surface_2 = font_menu.render(option_2, False, color)
+                screen.blit(text_surface_2, (340, 300 + index_2 * 50))
         
-        #font = pygame.font.Font(None, 36)
-        #laps_text = font.render(f"{players[0]}: {vueltas_1} vueltas", True, (0, 0, 0))
-        #screen.blit(laps_text, (10, 10))
-
-        #if len(players) > 1:
-            #laps_text_2 = font.render(f"{players[1]}: {vueltas_2} vueltas", True, (0, 0, 0))
-            #screen.blit(laps_text_2, (10, 40))
-
+            if event.type == pygame.KEYDOWN:
+                if event.key == pygame.K_UP:
+                    selected_2 = 0
+                elif event.key == pygame.K_DOWN:
+                    selected_2 = 1
+                elif event.key == pygame.K_RETURN:  # Detectar ENTER en el submenú
+                    enter_pressed = True
         
-        #if cpu:
-        #    laps_text_cpu = font.render(f"CPU: {vueltas_cpu} vueltas", True, (0, 0, 0))
-        #   screen.blit(laps_text_cpu, (10, 70))
+            if event.type == pygame.KEYUP:  # Detectar cuando ENTER es liberado
+                if event.key == pygame.K_RETURN and enter_pressed:
+                    enter_pressed = False
+                    if selected_2 == 0:  # CPU activado
+                        cpu = True
+                        sub_menu = False
+                    elif selected_2 == 1:  # CPU desactivado
+                        cpu = False
+                        sub_menu = False
+        
+        elif menu==False and sub_menu==False:            
+            # fill the screen with a color to wipe away anything from last frame
+            screen.fill((0,102,51))
+
+            # RENDER YOUR GAME HERE (Aca va el codigo de juego a actualizar en cada tick)
+            exterior = list(track.track_polygon.exterior.coords)
+            interior = list(track.track_polygon.interiors[0].coords)
+
+            screen.blit(BG, (-50,-50))
+
+            #Pintar pista
+            pygame.draw.polygon(screen, (228,190,110), interior + exterior[::-1], 0)
+
+            for tupla in range(len(exterior)-1):
+                pygame.draw.line(screen, (0,0,0),exterior[tupla],exterior[tupla+1])
+            for tupla in range(len(interior)-1):
+                pygame.draw.line(screen, (0,0,0),interior[tupla],interior[tupla+1])
+
+            #Printear linea de partida
+            finish_line_coords = list(track.finish_line.coords)  # Convierte LineString a lista de puntos
+            pygame.draw.line(screen, (255, 0, 0), (finish_line_coords[0][0], finish_line_coords[0][1]), (finish_line_coords[1][0], finish_line_coords[1][1]),3)
+
+            angle_fl=math.degrees(track.get_starting_direction())
+            rotated_sprite_fl = pygame.transform.rotate(finish_line,-angle_fl -90) 
+            sprite_rect_fl = finish_line.get_rect(center=track.get_starting_position())
+            screen.blit(rotated_sprite_fl, sprite_rect_fl.topleft)
+
+            #imprimir Players
+            angle_1 = math.degrees(car_1.direction) 
+            rotated_sprite_1 = pygame.transform.rotate(p1_sprite, -angle_1-90) 
+            sprite_rect_1 = rotated_sprite_1.get_rect(center=car_1.get_position())
+            screen.blit(rotated_sprite_1, sprite_rect_1.topleft)
+
+            if len(players)>1:
+                # Obtener el ángulo de dirección en grados --> la funcion se hace con grados, non radianes
+                angle_2 = math.degrees(car_2.direction)  # Convertir radianes a grados
+
+                # Rotar el sprite del Player 2
+                rotated_sprite_2 = pygame.transform.rotate(p2_sprite, -angle_2-90)  # Nota: el ángulo se invierte (-angle) porque pygame rota en sentido antihorario
+
+                # Ajustar la posición del sprite para que el centro sea consistente
+                sprite_rect_2 = rotated_sprite_2.get_rect(center=car_2.get_position())
+
+                # Dibujar el sprite rotado en la pantalla
+                screen.blit(rotated_sprite_2, sprite_rect_2.topleft)
+
+            if cpu:
+                angle_cpu = math.degrees(car_cpu.direction) 
+                rotated_sprite_cpu = pygame.transform.rotate(cpu_sprite, -angle_cpu-90) 
+                sprite_rect_cpu = rotated_sprite_cpu.get_rect(center=car_cpu.get_position())
+                screen.blit(rotated_sprite_cpu, sprite_rect_cpu.topleft)
+
+
+            #mover a player 1
+            p1_pressed_keys={"UP":False,"DOWN":False,"LEFT":False,"RIGHT":False}#las inicializo como no presionadas
+            if keys[pygame.K_UP]:
+                p1_pressed_keys["UP"]=True
+            if keys[pygame.K_DOWN]:
+                p1_pressed_keys["DOWN"]=True
+            if keys[pygame.K_LEFT]:
+                p1_pressed_keys["LEFT"]=True
+            if keys[pygame.K_RIGHT]:
+                p1_pressed_keys["RIGHT"]=True
+            p1_inside_track= track.is_point_inside_track(car_1.get_position())
+            acc_1,steer_1 = car_1.get_command(p1_pressed_keys, p1_inside_track)
+            car_1.send_command(acc_1,steer_1)
+            track.move_car(car_1)
+            car_1.distances=track.get_distances_car(car_1.position,car_1.direction)
+
+            if len(players)>1:
+                p2_pressed_keys={"UP":False,"DOWN":False,"LEFT":False,"RIGHT":False}#las inicializo como no presionadas
+                if keys[pygame.K_w]:
+                    p2_pressed_keys["UP"]=True
+                if keys[pygame.K_s]:
+                    p2_pressed_keys["DOWN"]=True
+                if keys[pygame.K_a]:
+                    p2_pressed_keys["LEFT"]=True
+                if keys[pygame.K_d]:
+                    p2_pressed_keys["RIGHT"]=True
+                p2_inside_track= track.is_point_inside_track(car_2.get_position())
+                acc_2,steer_2 = car_2.get_command(p2_pressed_keys, p2_inside_track)
+                car_2.send_command(acc_2,steer_2)
+                track.move_car(car_2)
+                car_2.distances=track.get_distances_car(car_2.position,car_2.direction)
+
+            if cpu:
+                cpu_inside_track= track.is_point_inside_track(car_cpu.get_position())
+                acc_cpu,steer_cpu = car_cpu.get_command(0, cpu_inside_track)
+                car_cpu.send_command(acc_cpu,steer_cpu)
+                track.move_car(car_cpu)
+                car_cpu.distances=track.get_distances_car(car_cpu.position,car_cpu.direction)
+
+            lap_1= track.check_lap([car_1.last_position,car_1.position])
+            if len(players)>1:
+                lap_2=track.check_lap([car_2.last_position,car_2.position])
+            if cpu:
+                lap_cpu=track.check_lap([car_cpu.last_position,car_cpu.position])
+
+            if lap_1:
+                vueltas_1+=1
+
+            if len(players)>1 and lap_2:
+                vueltas_2+=1
+
+            if cpu and lap_cpu:
+                vueltas_cpu+=1
+
+            if 3==vueltas_1:
+                print('Gano jugador 1')
+                running=False
+            if len(players)>1 and 3==vueltas_2:
+                print('Gano jugador 2')
+                running=False
+            if cpu and 3==vueltas_cpu:
+                print("Gano el rayo")
+                running=False
+
+            font_ls = pygame.font.Font(None, 28)
+            laps_text = font_ls.render(f"{players[0]}: {vueltas_1} laps, Speed: {car_1.speed:.2f}", False, (0, 0, 0))
+            screen.blit(laps_text, (10, 10))
+
+            if len(players) > 1:
+                laps_text_2 = font_ls.render(f"{players[1]}: {vueltas_2} laps, Speed: {car_2.speed:.2f}", False, (0, 0, 0))
+                screen.blit(laps_text_2, (10, 40))
+
+            if cpu:
+                laps_text_cpu = font_ls.render(f"El Rayo: {vueltas_cpu} laps, Speed: {car_cpu.speed:.2f}", False, (0, 0, 0))
+                screen.blit(laps_text_cpu, (500, 650))
 
 
     # flip() the display to put your work on screen
