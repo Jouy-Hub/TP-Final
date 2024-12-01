@@ -3,56 +3,41 @@ from car.car import Car
 from car.player_car import PlayerCar
 from car.auto_car import AutoCar
 import pygame
+import random
 
 import math
 
-def menu():
-    """
-    Muestra el menú del juego con tres opciones:
-    - 1 Player: Solicita el nombre del jugador e inicia el juego contra la CPU.
-    - 2 Players: Solicita los nombres de los jugadores y permite configurar un juego entre ambos o contra la CPU.
-    - Quit: Cierra el juego.
-
-    Retorna:
-    - players: Lista con los nombres de los jugadores.
-    - cpu: Booleano que indica si se juega contra la CPU.
-    """
-    pygame.init()
-    screen = pygame.display.set_mode((800, 720))
-
-    font = pygame.font.Font(None, 36)
-    options = ["1 Player", "2 Players", "Quit"]
-    selected = 0  # Índice de la opción seleccionada
-    cpu = False
-    players = []
-
 def game():
     pygame.init()
+    pygame.mixer.init()
     screen = pygame.display.set_mode((900, 820))
     clock = pygame.time.Clock()
     running = True
     menu=True
     sub_menu=False
 
-    menu_BG= pygame.image.load("Menu_BG.png")
+    menu_BG= pygame.image.load("Menu_BG_2.jpg")
     menu_BG = pygame.transform.scale(menu_BG, (900, 820))
 
     track = Track(x_max=900,y_max=820,margin_x=200,margin_y=200)
     starting_position=track.get_starting_position()
     starting_direction=track.get_starting_direction()
-    BG= pygame.image.load("Background_3.jpg")
+    BG= pygame.image.load("Background_2.jpg")
     BG = pygame.transform.scale(BG, (900, 820))
     finish_line=pygame.image.load("finish_line.png")
     finish_line=pygame.transform.scale(finish_line,(30,10))
+
+    pygame.mixer.music.load("EZ Rollers - Breakbeat Generation (Instrumental).mp3")
+    win_sound_effect = pygame.mixer.Sound("Final Fantasy I ost - Victory.mp3")
+    lap_sound_effect = pygame.mixer.Sound("Lap_audio.mp3")
+    sound_played = False
 
     wood_plank= pygame.image.load("wood_plank.png")
     wood_plank = pygame.transform.scale(wood_plank, (320, 105))
     wood_plank_menu=pygame.image.load("small_wood_plank.png")
     wood_plank_menu = pygame.transform.scale(wood_plank_menu, (300, 100))
-    win_BG= pygame.image.load("win_image.png")
+    win_BG= pygame.image.load("Winner.png")
     win_BG=pygame.transform.scale(win_BG, (900, 820))
-
-
     
     cars=[]
     teclas_1 = [pygame.K_UP, pygame.K_DOWN, pygame.K_LEFT, pygame.K_RIGHT]
@@ -60,7 +45,10 @@ def game():
     car_1=PlayerCar('player 1', 1,teclas_1,starting_position,starting_direction,distance_1)
     vueltas_1=0
     cars.append(car_1)
-    p1_sprite= pygame.image.load("P1_Car_Sprite_2.png")
+    random_car1=random.randint(1,3)
+    if random_car1==1: p1_sprite= pygame.image.load("P1_Sprite.png")
+    elif random_car1==2: p1_sprite= pygame.image.load("P1_Sprite_2.png")
+    else: p1_sprite= pygame.image.load("P1_Sprite_3.png")
     p1_sprite = pygame.transform.scale(p1_sprite, (30, 40))#resize
 
     teclas_2 = [pygame.K_w, pygame.K_s, pygame.K_a, pygame.K_d]
@@ -68,7 +56,10 @@ def game():
     car_2=PlayerCar('player 2', 2, teclas_2, starting_position,starting_direction,distance_2)
     vueltas_2=0
     cars.append(car_2)
-    p2_sprite= pygame.image.load("P2_Car_Sprite.png")
+    random_car2=random.randint(1,3)
+    if random_car2==1: p2_sprite= pygame.image.load("P2_Sprite.png")
+    elif random_car2==2: p2_sprite= pygame.image.load("P2_Sprite_2.png")
+    else: p2_sprite= pygame.image.load("P2_Sprite_3.png")
     p2_sprite = pygame.transform.scale(p2_sprite, (30, 40))#resize
 
     distance_cpu=track.get_distances_car(starting_position,starting_direction)
@@ -76,7 +67,7 @@ def game():
     car_cpu = AutoCar("CPU", 95,teclas_cpu,starting_position,starting_direction,distance_cpu)
     vueltas_cpu=0
     cars.append(car_cpu)
-    cpu_sprite= pygame.image.load("El_Rayo_Sprite_2.png")
+    cpu_sprite= pygame.image.load("El_Rayo_Sprite.png")
     cpu_sprite = pygame.transform.scale(cpu_sprite, (30, 40))#resize
 
     font_menu = pygame.font.Font(None, 36)
@@ -102,7 +93,7 @@ def game():
             wood_plank_menu_rect = wood_plank_menu.get_rect(center=((900//2), 820//2+30))
             screen.blit(wood_plank_menu, wood_plank_menu_rect)
             for index, option in enumerate(options):
-                color = (0, 0, 0) if index != selected else (150, 0, 150)  # Resalta la opción seleccionada
+                color = (0, 0, 0) if index != selected else (251, 255, 163)  # Resalta la opción seleccionada
                 text_surface = font_menu.render(option, False, color)  # Renderiza la opción
                 tx_menu_rect = text_surface.get_rect(center=((900//2), 820//2 + index * 50)) #resto
             
@@ -134,7 +125,7 @@ def game():
             wood_plank_menu_rect = wood_plank_menu.get_rect(center=((900//2), 820//2+30))
             screen.blit(wood_plank_menu, wood_plank_menu_rect)
             for index_2, option_2 in enumerate(options_2):
-                color = (0, 0, 0) if index_2 != selected_2 else (150, 0, 150)
+                color = (0, 0, 0) if index_2 != selected_2 else (251, 255, 163)
                 text_surface_2 = font_menu.render(option_2, False, color)
                 tx_sub_menu_rect = text_surface.get_rect(center=((900//2), 820//2 + index_2 * 50))
                 screen.blit(text_surface_2, tx_sub_menu_rect)
@@ -169,6 +160,9 @@ def game():
 
             screen.blit(wood_plank, (10,10))
 
+            if not pygame.mixer.music.get_busy():
+                pygame.mixer.music.play(loops=-1)
+
             #Pintar pista
             pygame.draw.polygon(screen, (228,190,110), interior + exterior[::-1], 0)
 
@@ -188,7 +182,7 @@ def game():
 
             #imprimir Players
             angle_1 = math.degrees(car_1.direction) 
-            rotated_sprite_1 = pygame.transform.rotate(p1_sprite, -angle_1-90) 
+            rotated_sprite_1 = pygame.transform.rotate(p1_sprite, -angle_1+90) 
             sprite_rect_1 = rotated_sprite_1.get_rect(center=car_1.get_position())
             screen.blit(rotated_sprite_1, sprite_rect_1.topleft)
 
@@ -197,7 +191,7 @@ def game():
                 angle_2 = math.degrees(car_2.direction)  # Convertir radianes a grados
 
                 # Rotar el sprite del Player 2
-                rotated_sprite_2 = pygame.transform.rotate(p2_sprite, -angle_2-90)  # Nota: el ángulo se invierte (-angle) porque pygame rota en sentido antihorario
+                rotated_sprite_2 = pygame.transform.rotate(p2_sprite, -angle_2+90)  # Nota: el ángulo se invierte (-angle) porque pygame rota en sentido antihorario
 
                 # Ajustar la posición del sprite para que el centro sea consistente
                 sprite_rect_2 = rotated_sprite_2.get_rect(center=car_2.get_position())
@@ -272,12 +266,15 @@ def game():
 
             if lap_1:
                 vueltas_1+=1
+                lap_sound_effect.play()
 
             if len(players)>1 and lap_2:
                 vueltas_2+=1
+                lap_sound_effect.play()
 
             if cpu and lap_cpu:
                 vueltas_cpu+=1
+                lap_sound_effect.play()
 
             if vueltas_1==3:
                 win=True
@@ -290,26 +287,32 @@ def game():
 
         elif win == True and menu == False and sub_menu == False:
             screen.blit(win_BG, (0,0))
+            if not sound_played:
+                win_sound_effect.play()  # Play the sound effect
+            sound_played = True
             if vueltas_1==3:
-                font_win = pygame.font.Font(None, 150)
-                text_win=font_win.render(f'Player 1 wins!',False,(63, 11, 57))
-                text_win_rect = text_win.get_rect(center=((900//2), 820//2-270))
+                pygame.mixer.music.stop()
+                font_win = pygame.font.Font(None, 100)
+                text_win=font_win.render(f'Player 1 wins!',False,(24, 21, 38))
+                text_win_rect = text_win.get_rect(center=((900//2), 820//2+300))
                 screen.blit(text_win,text_win_rect)
                 if event.type == pygame.KEYDOWN:  # Detectar cuando ENTER es liberado
                     if event.key == pygame.K_RETURN:
                         running=False
             elif vueltas_2==3:
-                font_win = pygame.font.Font(None, 150)
+                pygame.mixer.music.stop()
+                font_win = pygame.font.Font(None, 100)
                 text_win=font_win.render(f'Player 2 wins!',False,(63, 11, 57))
-                text_win_rect = text_win.get_rect(center=((900//2), 820//2-270))
+                text_win_rect = text_win.get_rect(center=((900//2), 820//2+300))
                 screen.blit(text_win,text_win_rect)
                 if event.type == pygame.KEYDOWN:  # Detectar cuando ENTER es liberado
                     if event.key == pygame.K_RETURN:
                         running=False
             elif vueltas_cpu==3:
-                font_win = pygame.font.Font(None, 150)
+                pygame.mixer.music.stop()
+                font_win = pygame.font.Font(None, 100)
                 text_win=font_win.render(f'El Rayo wins!',False,(63, 11, 57))
-                text_win_rect = text_win.get_rect(center=((900//2), 820//2-270))
+                text_win_rect = text_win.get_rect(center=((900//2), 820//2+300))
                 screen.blit(text_win,text_win_rect)
                 if event.type == pygame.KEYDOWN:  # Detectar cuando ENTER es liberado
                     if event.key == pygame.K_RETURN:
@@ -320,5 +323,5 @@ def game():
         pygame.display.flip()
 
         clock.tick(100)
-
+    
     pygame.quit()
