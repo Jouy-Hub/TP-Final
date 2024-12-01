@@ -15,7 +15,7 @@ class PlayerCar(Car):
         super().init(driver_name, car_number,movement_keys,position, direction,distances)
         self.movement_keys = movement_keys
 
-    def get_command(self, pygame_keys, is_inside_track):#no hace falta inside track
+    def get_command(self, pygame_keys, is_inside_track):
         """
         Returns the command for the car
 
@@ -26,8 +26,8 @@ class PlayerCar(Car):
         Returns:
             list[float]: The command [acceleration, steering]
         """
-        # baja la aceleracion si esta fuera de la pista
-        if pygame_keys["UP"]==True and pygame_keys["DOWN"]==False:#para que no haya errores al apretar los dos
+       
+        if pygame_keys["UP"]==True and pygame_keys["DOWN"]==False:
             acceleration=0.0025
         elif pygame_keys["DOWN"]==True and pygame_keys["UP"]==False:
             acceleration=-0.0025
@@ -39,7 +39,5 @@ class PlayerCar(Car):
             steering=-math.radians(0.5)
         else:
             steering=0
-
-        #que hago con la bool (la posicion modifica la velocidad o la aceleracion?)
-
+            
         return [acceleration, steering]

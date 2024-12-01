@@ -3,7 +3,6 @@
 import math
 import pygame
 
-
 class Car:
     def __init__(self, driver_name: str, car_number: int) -> None:
         raise NotImplementedError("Car class must be inherited by a child class")
@@ -52,7 +51,7 @@ class Car:
         """
         return self.direction
 
-    def set_position(self, position: list[float]): #cambia la posicion
+    def set_position(self, position: list[float]):
         """
         Sets the position of the car (and save the last position too)
 
@@ -64,7 +63,7 @@ class Car:
        
         pass
 
-    def set_speed(self, speed: float): #cambia la velocidad, teniendo en cuenta max speed
+    def set_speed(self, speed: float):
         """
         Sets the speed of the car
 
@@ -84,7 +83,7 @@ class Car:
         self.direction=direction
         pass
 
-    def set_distances(self, distances: list[float]):#track.get_distances(car)
+    def set_distances(self, distances: list[float]):
         """
         Sets the distances of the car
 
